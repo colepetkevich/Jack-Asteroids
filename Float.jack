@@ -1,0 +1,390 @@
+class Float{
+
+    //FIELDS
+
+    static int precision;
+    field int n, om; // number, orderOfMagnitude
+    //n:9500
+    //om:-3
+
+    function void init(){
+        let precision = 4;
+        return;
+    }
+
+    //CONSTRUCTORS
+
+    //default constructor
+    constructor Float new(int num){
+        let n = num;
+        let om = 0;
+
+        do normalize();
+        return this;
+    }
+
+    //second constructor
+    constructor Float new1(String num){
+        var int i, len, msdLoc, decLoc, currOM;
+        var char c, digit;
+        var bool msdFound;
+        
+        let n = 0;
+        let om = 0;
+
+        let i = 0;
+        let len = num.length();
+        let msdFound = false;
+        let decLoc = len;
+        while (i < len){
+            let c = num.charAt(i);
+
+            //finding location of most significiant digit
+            if (~msdFound & (c > 48) & (c < 58)){
+                let msdFound = true;
+                let msdLoc = i;
+            }
+
+            //finding location of decimal
+            if (c = 46){
+                let decLoc = i;
+            }
+            let i = i+1;
+        }
+
+        //setting order of magnitude
+        let om = decLoc-msdLoc-precision;
+        if (msdLoc > decLoc){
+            let om = om+1;
+        }
+
+        //setting number
+        let i = msdLoc;
+        let currOM = precision - 1;
+        while ((i < len) & (currOM > -1)){
+            let c = num.charAt(i);
+
+            //is digit
+            if ((c > 47) & (c < 58)){
+                let digit = c - 48;
+                
+                //digit is before decimal
+                let n = n + (digit * Float.pow(10, currOM));
+                let currOM = currOM - 1;
+            }
+
+            //rounding least significant digit
+            if (((i+1) < len) & (currOM = -1)){
+                let c = num.charAt(i+1);
+                //if c is the decimal go to next check next digit
+                if (((i+2) < len) & (c = 46)){
+                    let c = num.charAt(i+2);
+                }
+                //if c digit is 5 or greator, round n (increment it)
+                if ((c > 52) & (c < 58)){
+                    let n = n+1;
+                }
+            }
+            let i = i+1;
+        }
+
+        //making this Float negative, if there is a dash 
+        if (len > 0){
+            if (num.charAt(0) = 45){
+                let n = -n;
+            }
+        }
+
+        do num.dispose();
+        return this;
+    }
+
+    //third constructor (copy)
+    constructor Float new2(Float other){
+        let n = other.getNumber();
+        let om = other.getOrderOfMagnitude();
+        return this;
+    }
+
+    //METHODS
+
+    method void dispose(){
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    //getters
+    function int getPrecision() { return precision; }
+    method int getNumber() { return n; }
+    method int getOrderOfMagnitude() { return om; }
+
+    //prints Float
+    method void print(){
+        do Output.printInt(n);
+        do Output.printString("*10^");
+        do Output.printInt(om);
+        return;
+    }
+
+    //return rounded int (-9999 to 9999)
+    method int toInt() {
+        var int num, currOM;
+        let num = n;
+        let currOM = om;
+
+        if (n = 0) {
+            return 0;
+        }
+
+        if (currOM > 0){
+            do Sys.error(6);
+        }
+
+        while (currOM < 0){
+            //does roundingW
+            if (currOM = -1){
+                let num = Float.roundTo10(num);
+            }
+
+            let num = num/10;
+            let currOM = currOM + 1;
+        }
+
+        return num;
+    }
+
+    //returns true if this Float is equal to other Float
+    method boolean eq(Float other) { return (n = other.getNumber()) & (om = other.getOrderOfMagnitude()); }
+
+    //returns true if this Float is greater than other Float
+    method boolean gt(Float other) {
+        //same order of magnitude, but a higher number
+        if ((om = other.getOrderOfMagnitude()) & (n > other.getNumber())){
+            return true;
+        }
+
+        //this is positive/zero
+        if (n > -1){
+            //other is negative
+            if (other.getNumber() < 0){
+                return true;
+            }
+            //other is positive/zero
+            else{
+                if (om > other.getOrderOfMagnitude()){
+                    return n > other.getNumber();
+                }
+            }
+        }
+        //this is negative
+        else{
+            //other is negative
+            if (other.getNumber() < 0){
+                if (om < other.getOrderOfMagnitude()){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    //makes Float negative
+    method void neg(){
+        let n = -n;
+        return;
+    }
+
+    //adds other Float with this Float
+    method void add(Float other){
+        var int otherN;
+        if (n = 0){
+            let n = other.getNumber();
+            let om = other.getOrderOfMagnitude();
+            return;
+        }
+        if (other.getNumber() = 0){
+            return;
+        }
+        let otherN = normalizeFloats(other.getNumber(), other.getOrderOfMagnitude());
+        let n = n + otherN;
+        do normalize();
+        return;
+    }
+
+    //subtracts other Float from this Float
+    method void sub(Float other){
+        var int otherN;
+        if (n = 0){
+            let n = -other.getNumber();
+            let om = other.getOrderOfMagnitude();
+            return;
+        }
+        if (other.getNumber() = 0){
+            return;
+        }
+        let otherN = normalizeFloats(other.getNumber(), other.getOrderOfMagnitude());
+        let n = n - otherN;
+        do normalize();
+        return;
+    }
+
+    //multiplying other Float with this Float
+    method void mult(Float other){
+        if ((n = 0) | (other.getNumber() = 0)){
+            let n = 0;
+            let om = -3;
+            return;
+        }
+
+        let n = (Float.roundTo10(n/10)/10)*(Float.roundTo10(other.getNumber()/10)/10);
+        let om = om+other.getOrderOfMagnitude()+4;
+        do normalize();
+        return;
+    }
+
+    //dividing other Float with this Float
+    method void div(Float other){
+        if (n = 0){
+            let om = -3;
+            return;
+        }
+        if (other.getNumber() = 0){
+            do Sys.errorCode(3);
+        }
+
+        let n = n/(Float.roundTo10(other.getNumber()/10)/10);
+        let om = om-other.getOrderOfMagnitude()-2;
+        do normalize();
+        return;
+    }
+
+
+    //PRIVATE METHODS
+
+    //normalizes Floats for addition or subtraction
+    method int normalizeFloats(int otherN, int otherOM){
+        if (om > otherOM){
+            while (~(om = otherOM)){
+                let otherN = otherN/10;
+                let otherOM = otherOM+1;
+            }
+        }
+        if (om < otherOM) {
+            while (~(om = otherOM)){
+                let n = n/10;
+                let om = om+1;
+            }
+        }
+
+        return otherN;
+    }
+
+    //normalizes Float after arithmetic
+    method void normalize(){
+        if (n = 0){
+            let om = -3;
+            return;
+        }
+
+        if ((n > 9999) | (n < -9999)){
+            let n = Float.roundTo10(n);
+            let n = n/10;
+            let om = om+1;
+        }
+        while (((n > 0) & (n < 1000)) | ((n < 0) & (n > -1000))){
+            let n = n*10;
+            let om = om-1;
+        }
+        return;
+    }
+
+
+    //FUNCTIONS
+
+    //sin function takes Angle x (radians) and returns ratio y (opposite/hypotenuse)
+    function Float sin(Angle x){
+        var Float y, y1, y2, y3, d1, d2, d3;
+        let y = Float.new2(x.toFloat());
+
+        let d1 = Float.new(6);
+        let d2 = Float.new(120);
+        let d3 = Float.new(5040);
+
+        let y1 = Float.new2(y);
+        do y1.mult(y);
+        do y1.mult(y);
+
+        let y2 = Float.new2(y1);
+        do y2.mult(y);
+        do y2.mult(y);
+
+        let y3 = Float.new2(y2);
+        do y3.mult(y);
+        do y3.mult(y);
+
+        do y1.div(d1);
+        do y2.div(d2);
+        do y3.div(d3);
+
+        do y.sub(y1);
+        do y.add(y2);
+        do y.sub(y3);
+
+        do y1.dispose();
+        do y2.dispose();
+        do y3.dispose();
+        do d1.dispose();
+        do d2.dispose();
+        do d3.dispose();
+        return y;
+    }
+
+    //cos function takes Angle x (radians) and returns ratio y (adjacent/hypotenuse)
+    function Float cos(Angle x){
+        var Angle x1;
+        var Float y;
+
+        let x1 = Angle.new1(x);
+        do x1.rotate(Angle.halfPi());
+        let y = Float.sin(x1);
+
+        do x1.dispose();
+        return y;
+    }
+
+    //PRIVATE FUNCTIONS
+
+    //lsd gets incremented by 10 if it is large enough to be rounded
+    function int roundTo10(int num){
+        //positive/zero
+        if (num > -1){
+            if (num-(num/10*10)>4){
+                let num = num+10;
+            }
+        }
+        //negative
+        else {
+            if (num-(num/10*10)<-4){
+                let num = num-10;
+            }
+        }
+        return num;
+    }
+
+    //Integer exponent operation
+    function int pow(int a, int b){
+        var int output;
+        let output = a;
+
+        if (b = 0){
+            let output = 1;
+        }
+
+        while (b > 1){
+            let output = output*a;
+            let b=b-1;
+        }
+        return output;
+    }
+}

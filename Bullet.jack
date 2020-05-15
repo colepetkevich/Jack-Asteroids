@@ -1,0 +1,74 @@
+class Bullet{
+
+    field Float x, y, vx, vy;
+    field int r, prevX, prevY;
+
+    constructor Bullet new(int ix, int iy, int ir, Float speed, Angle dir) {
+        let x = Float.new(ix);
+        let y = Float.new(iy);
+        let r = ir;
+        let prevX = x.toInt();
+        let prevY = y.toInt();
+
+        let vx = Float.cos(dir);
+        let vy = Float.sin(dir);
+        do vx.mult(speed);
+        do vy.mult(speed);
+        return this;
+    }
+
+    method void dispose() {
+        do x.dispose();
+        do y.dispose();
+        do vx.dispose();
+        do vy.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method Float getX() { return x; }
+    method Float getY() { return y; }
+
+    method void move() {
+        do x.add(vx);
+        do y.add(vy);
+        return;
+    }
+
+    method boolean inBounds(){
+        var int bx, by;
+        let bx = x.toInt();
+        let by = y.toInt();
+
+        if ((bx-r) < 0) {
+            return false;
+        }
+        if ((by-r) < 0) {
+            return false;
+        }
+        if ((bx+r) > (Main.getScreenWidth()-1)) {
+            return false;
+        }
+        if ((by+r) > (Main.getScreenHeight()-1)) {
+            return false;
+        }
+        return true;
+    }
+
+    method void draw(){
+        do erasePrev();
+        
+        do Screen.setColor(false);
+        do Screen.drawCircle(x.toInt(), y.toInt(), r);
+
+        let prevX = x.toInt();
+        let prevY = y.toInt();
+        return;
+    }
+
+    method void erasePrev(){
+        do Screen.setColor(true);
+        do Screen.drawCircle(prevX, prevY, r);
+        return;
+    }
+}

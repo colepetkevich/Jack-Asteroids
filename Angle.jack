@@ -1,0 +1,65 @@
+class Angle{
+
+    static Float pi, halfPi, negPi, twoPi;
+    field Float angle; // between  pi and pi
+
+    function void init() {
+        let pi = Float.new1("3.142");
+        let negPi = Float.new1("-3.142");
+        let halfPi = Float.new1("1.571");
+        let twoPi = Float.new1("6.283");
+
+        return;
+    }
+
+    function Float pi() { return pi; }
+    function Float halfPi() { return  halfPi; }
+    function Float negPi() { return negPi; }
+    function Float twoPi() { return twoPi; }
+
+    constructor Angle new() {
+        let angle = Float.new(0);
+        return this;
+    }
+
+    constructor Angle new1(Angle a) {
+        let angle = Float.new(0);
+        do rotate(a.toFloat());
+        return this;
+    }
+
+    method void dispose(){
+        do angle.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method Float toFloat() { return angle; }
+
+    method void print() {
+        do angle.print();
+        return;
+    }
+
+    method void rotate(Float a){
+        do angle.add(a);
+        do normalize();
+        return;
+    }
+
+    method void rotateBack(Float a){
+        do angle.sub(a);
+        do normalize();
+        return;
+    }
+
+    method void normalize(){
+        while (angle.gt(pi)) {
+            do angle.sub(twoPi);
+        }
+        while (negPi.gt(angle)) {
+            do angle.add(twoPi);
+        }
+        return;
+    }
+}

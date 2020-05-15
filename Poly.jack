@@ -1,0 +1,133 @@
+class Poly{
+
+    field Float x, y, vx, vy;
+    field int vCount;
+    field Array finalX, finalY, currX, currY, prevX, prevY;
+
+    constructor Poly new(int ix, int iy, Array xs, Array ys, int vc, Float speed, Angle dir){
+        let x = Float.new(ix);
+        let y = Float.new(iy);
+        let vCount = vc;
+        let finalX = xs;
+        let finalY = ys;
+        let currX = Array.new(vCount);
+        let currY = Array.new(vCount);
+        let prevX = Array.new(vCount);
+        let prevY = Array.new(vCount);
+
+        let vx = Float.cos(dir);
+        let vy = Float.sin(dir);
+        do vx.mult(speed);
+        do vy.mult(speed);
+
+        do calcPos();
+        do copyPoints();
+        return this;
+    }
+
+    method void dispose() {
+        do x.dispose();
+        do y.dispose();
+        do vx.dispose();
+        do vy.dispose();
+        do currX.dispose();
+        do currY.dispose();
+        do prevX.dispose();
+        do prevY.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method Float getX() { return x; }
+    method Float getY() { return y; }
+
+    method void move() {
+        do x.add(vx);
+        do y.add(vy);
+        do checkBounds();  
+        return;
+    }
+
+    method void draw(){
+        //calculating positions of vertex's first
+        do calcPos();
+
+        //erasing previous lines
+        do erasePrev();
+
+        //drawing new lines
+        do Screen.setColor(false);
+        do drawLines(currX, currY);
+        do copyPoints();
+        return;
+    }
+
+    method void drawLines(Array xPos, Array yPos){
+        var int i;
+        let i = 0;
+        while (i < (vCount-1)){
+            do Screen.drawLine(xPos[i], yPos[i], xPos[i+1], yPos[i+1]);
+            let i = i+1;
+        }
+        do Screen.drawLine(xPos[vCount-1], yPos[vCount-1], xPos[0], yPos[0]);
+        return;
+    }
+
+    method void erasePrev(){
+        //erasing previous lines
+        do Screen.setColor(true);
+        do drawLines(prevX, prevY);
+        return;
+    }
+
+    method void calcPos() {
+        var int i, xi, yi;
+        let i = 0;
+        let xi = x.toInt();
+        let yi = y.toInt();
+
+        while (i < vCount){
+            let currX[i] = Main.fx(xi+finalX[i]);
+            let currY[i] = Main.fy(yi+finalY[i]);
+            let i = i+1;
+        }
+        return;
+    }
+
+    method void copyPoints(){
+        var int i;
+        let i = 0;
+        while (i < vCount){
+            let prevX[i] = currX[i];
+            let prevY[i] = currY[i];
+            let i = i+1;
+        }
+        return;
+    }
+
+    method void checkBounds(){
+        var Float w, h;
+        var int sx, sy;
+        let sx = x.toInt();
+        let sy = y.toInt();
+        let w = Float.new(Main.getScreenWidth());
+        let h = Float.new(Main.getScreenHeight());
+
+        if (sx < 0) {
+            do x.add(w);
+        }
+        if (sy < 0) {
+            do y.add(h);
+        }
+        if (sx > (Main.getScreenWidth()-1)) {
+            do x.sub(w);
+        }
+        if (sy > (Main.getScreenHeight()-1)) {
+            do y.sub(h);
+        }
+
+        do w.dispose();
+        do h.dispose();
+        return;
+    }
+}

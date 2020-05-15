@@ -1,0 +1,533 @@
+class AsteroidSpawner{
+
+    //random positions and numbers
+    static int posCount, randIntCount;
+    static Array xPos, yPos, randInts; //store "random" spawn locations and ints
+    static Float rs1, rs2, rs3, rs4; //random speeds
+    static Angle ra1, ra2, ra3, ra4; //random angles
+
+    //premade asteroids
+    static int aVertCount, saRadius, laRadius;
+    static Array a1x, a1y, a2x, a2y, a3x, a3y;
+    static Array la1x, la1y, la2x, la2y, la3x, la3y;
+    static Float saSpeedMult;
+
+    field Poly la1, la2, la3, la4, sa1, sa2, sa3, sa4, sa5, sa6;
+    field int randInt, randIntIndex;
+    field Explosion e1, e2, e3;
+
+    function void init(){
+        let posCount = 10;
+        let xPos = Array.new(posCount);
+        let yPos = Array.new(posCount);
+        let xPos[0] = 0;
+        let yPos[0] = 8;
+        let xPos[1] = 511;
+        let yPos[1] = 30;
+        let xPos[2] = 70;
+        let yPos[2] = 255;
+        let xPos[3] = 396;
+        let yPos[3] = 255;
+        let xPos[4] = 312;
+        let yPos[4] = 0;
+        let xPos[5] = 511;
+        let yPos[5] = 210;
+        let xPos[6] = 0;
+        let yPos[6] = 244;
+        let xPos[7] = 0;
+        let yPos[7] = 98;
+        let xPos[8] = 157;
+        let yPos[8] = 0;
+        let xPos[9] = 238;
+        let yPos[9] = 255;
+
+        let randIntCount = 20;
+        let randInts = Array.new(randIntCount);
+        let randInts[0] = 2;
+        let randInts[1] = 3;
+        let randInts[2] = 4;
+        let randInts[3] = 6;
+        let randInts[4] = 1;
+        let randInts[5] = 7;
+        let randInts[6] = 1;
+        let randInts[7] = 8;
+        let randInts[8] = 9;
+        let randInts[9] = 0;
+        let randInts[10] = 7;
+        let randInts[11] = 3;
+        let randInts[12] = 6;
+        let randInts[13] = 5;
+        let randInts[14] = 8;
+        let randInts[15] = 2;
+        let randInts[16] = 4;
+        let randInts[17] = 9;
+        let randInts[18] = 0;
+        let randInts[19] = 5;
+
+        //random angles and speed
+        let rs1 = Float.new1("3.4");
+        let rs2 = Float.new1("-4.1");
+        let rs3 = Float.new1("3.2");
+        let rs4 = Float.new1("-2.5");
+        let ra1 = Angle.new();
+        do ra1.rotate(rs1);
+        do ra1.rotate(rs1);
+        do ra1.rotate(rs4);
+        let ra2 = Angle.new();
+        do ra2.rotate(rs3);
+        do ra2.rotate(rs4);
+        let ra3 = Angle.new();
+        do ra3.rotate(rs3);
+        let ra4 = Angle.new();
+        do ra4.rotate(rs4);
+        do ra4.rotate(rs3);
+
+        //radius and vertex count
+        let saRadius = 15;
+        let laRadius = 30;
+        let aVertCount = 8;
+        let saSpeedMult = Float.new1("1.5");
+
+        //asteroid model 1
+        let a1x = Array.new(aVertCount);
+        let a1y = Array.new(aVertCount);
+        let a1x[0] = 6;
+        let a1y[0] = 6;
+        let a1x[1] = 7;
+        let a1y[1] = 15;
+        let a1x[2] = -2;
+        let a1y[2] = 17;
+        let a1x[3] = -14;
+        let a1y[3] = 3;
+        let a1x[4] = -5;
+        let a1y[4] = -3;
+        let a1x[5] = -8;
+        let a1y[5] = -13;
+        let a1x[6] = 14;
+        let a1y[6] = -13;
+        let a1x[7] = 17;
+        let a1y[7] = 1;
+
+        //asteroid model 2
+        let a2x = Array.new(aVertCount);
+        let a2y = Array.new(aVertCount);
+        let a2x[0] = 18;
+        let a2y[0] = 1;
+        let a2x[1] = 5;
+        let a2y[1] = 6;
+        let a2x[2] = 12;
+        let a2y[2] = 10;
+        let a2x[3] = -4;
+        let a2y[3] = 15;
+        let a2x[4] = -16;
+        let a2y[4] = 6;
+        let a2x[5] = -11;
+        let a2y[5] = -14;
+        let a2x[6] = -1;
+        let a2y[6] = -9;
+        let a2x[7] = 7;
+        let a2y[7] = -12;
+
+        //asteroid model 3
+        let a3x = Array.new(aVertCount);
+        let a3y = Array.new(aVertCount);
+        let a3x[0] = 3;
+        let a3y[0] = 5;
+        let a3x[1] = 7;
+        let a3y[1] = 1;
+        let a3x[2] = 17;
+        let a3y[2] = 2;
+        let a3x[3] = 8;
+        let a3y[3] = -11;
+        let a3x[4] = -4;
+        let a3y[4] = -15;
+        let a3x[5] = -14;
+        let a3y[5] = -4;
+        let a3x[6] = -9;
+        let a3y[6] = 11;
+        let a3x[7] = 5;
+        let a3y[7] = 12;
+
+        //creating large astroid models
+        let la1x = Main.copyArr(a1x, aVertCount, -2);
+        let la1y = Main.copyArr(a1y, aVertCount, 2);
+        let la2x = Main.copyArr(a2x, aVertCount, -2);
+        let la2y = Main.copyArr(a2y, aVertCount, -2);
+        let la3x = Main.copyArr(a3x, aVertCount, 2);
+        let la3y = Main.copyArr(a3y, aVertCount, -2);
+
+        return;
+    }
+
+    constructor AsteroidSpawner new() {
+        let la1 = null;
+        let la2 = null;
+        let la3 = null;
+        let la4 = null;
+        let sa1 = null;
+        let sa2 = null;
+        let sa3 = null;
+        let sa4 = null;
+        let sa5 = null;
+        let sa6 = null;
+        // let sa7 = null;
+        // let sa8 = null;
+        let e1 = null;
+        let e2 = null;
+        let e3 = null;
+
+        let randIntIndex = 8;
+        do changeRandInt();
+        return this;
+    }
+
+    method void dispose(){
+        do la1.dispose();
+        do la2.dispose();
+        do la3.dispose();
+        do la4.dispose();
+        do sa1.dispose();
+        do sa2.dispose();
+        do sa3.dispose();
+        do sa4.dispose();
+        do sa5.dispose();
+        do sa6.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void spawnAsteroid() {
+        var int i;
+        var Float speed;
+        var Angle angle;
+        let i = randInt;
+
+        //selecting semi random speed
+        let speed = rs1;
+        if ((i = 1) | (i = 2)) { let speed = rs2; }
+        if ((i = 3) | (i = 6) | (i = 0)) { let speed = rs3; }
+        if ((i = 5) | (i = 7)) { let speed = rs4; }
+
+        //selecting semi random angle
+        let angle = ra1;
+        if ((i = 3) | (i = 4) | (i = 8)) { let angle = ra2; }
+        if ((i = 5) | (i = 7)) { let angle = ra3; }
+        if ((i = 9) | (i = 0)) { let angle = ra4; }
+
+        if (la1 = null) {
+            let la1 = Poly.new(xPos[i], yPos[i], la1x, la1y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (la2 = null){
+            let la2 = Poly.new(xPos[i], yPos[i], la2x, la2y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (la3 = null){
+            let la3 = Poly.new(xPos[i], yPos[i], la3x, la3y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (la4 = null) {
+            let la4 = Poly.new(xPos[i], yPos[i], la1x, la1y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        return;
+    }
+
+    method void spawnSmallAsteroid(Float x, Float y) {
+        var int i, ix, iy;
+        var Float speed;
+        var Angle angle;
+        let i = randInt;
+        let ix = x.toInt();
+        let iy = y.toInt();
+
+        //selecting semi random speed
+        let speed = Float.new2(rs1);
+        if ((i = 4) | (i = 1)) { let speed = Float.new2(rs2); }
+        if ((i = 2) | (i = 5)) { let speed = Float.new2(rs3); }
+        if ((i = 3) | (i = 6) | (i = 8)) { let speed = Float.new2(rs4); }
+        //small asteroids are faster
+        do speed.mult(saSpeedMult);
+
+        //selecting semi random angle
+        let angle = ra1;
+        if ((i = 8) | (i = 3)) { let angle = ra2; }
+        if ((i = 5) | (i = 4)) { let angle = ra3; }
+        if ((i = 7) | (i = 0) | (i = 1)) { let angle = ra4; }
+
+        if (sa1 = null) {
+            let sa1 = Poly.new(ix, iy, a2x, a2y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (sa2 = null){
+            let sa2 = Poly.new(ix, iy, a3x, a3y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (sa3 = null){
+            let sa3 = Poly.new(ix, iy, a1x, a1y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (sa4 = null) {
+            let sa4 = Poly.new(ix, iy, a3x, a3y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (sa5 = null) {
+            let sa5 = Poly.new(ix, iy, a2x, a2y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        if (sa6 = null){
+            let sa6 = Poly.new(ix, iy, a3x, a3y, aVertCount, speed, angle);
+            do changeRandInt();
+            return;
+        }
+        return;
+    }
+
+    method void spawnExplosion(Float x, Float y){
+        var int ix, iy; 
+        let ix = x.toInt();
+        let iy = y.toInt();
+
+        if (e1 = null){
+            let e1 = Explosion.new(ix, iy);
+            return;
+        }
+        if (e2 = null){
+            let e2 = Explosion.new(ix, iy);
+            return;
+        }
+        if (e3 = null){
+            let e3 = Explosion.new(ix, iy);
+            return;
+        }
+        return;                
+    }
+
+    method void drawAsteroids(){
+        //large
+        if (~(la1 = null)) {
+            do la1.draw();
+        }
+        if (~(la2 = null)) {
+            do la2.draw();
+        }
+        if (~(la3 = null)) {
+            do la3.draw();
+        }
+        if (~(la4 = null)) {
+            do la4.draw();
+        }
+        //small
+        if (~(sa1 = null)) {
+            do sa1.draw();
+        }
+        if (~(sa2 = null)) {
+            do sa2.draw();
+        }
+        if (~(sa3 = null)) {
+            do sa3.draw();
+        }
+        if (~(sa4 = null)) {
+            do sa4.draw();
+        }
+        if (~(sa5 = null)) {
+            do sa5.draw();
+        }
+        if (~(sa6 = null)) {
+            do sa6.draw();
+        }
+
+        //explosions
+        if (~(e1 = null)) {
+            if (e1.draw()){
+                let e1 = null;
+            }
+        }
+        if (~(e2 = null)) {
+            if (e2.draw()){
+                let e2 = null;
+            }
+        }
+        if (~(e3 = null)) {
+            if (e3.draw()){
+                let e3 = null;
+            }
+        }                
+        return;
+    }
+
+    method void moveAstroids() {
+        //large
+        if (~(la1 = null)) {
+            do la1.move();
+        }
+        if (~(la2 = null)) {
+            do la2.move();
+        }
+        if (~(la3 = null)) {
+            do la3.move();
+        }
+        if (~(la4 = null)) {
+            do la4.move();
+        }
+        //small
+        if (~(sa1 = null)) {
+            do sa1.move();
+        }
+        if (~(sa2 = null)) {
+            do sa2.move();
+        }
+        if (~(sa3 = null)) {
+            do sa3.move();
+        }
+        if (~(sa4 = null)) {
+            do sa4.move();
+        }
+        if (~(sa5 = null)) {
+            do sa5.move();
+        }
+        if (~(sa6 = null)) {
+            do sa6.move();
+        }
+
+        //explosions
+        if (~(e1 = null)) {
+            do e1.move();
+        }
+        if (~(e2 = null)) {
+            do e2.move();
+        }
+        if (~(e3 = null)) {
+            do e3.move();
+        }         
+        return;
+    }
+
+    method boolean hasBeenHit(Float x, Float y) {
+        var int x1, y1;
+        var boolean didCollide;
+        let x1 = x.toInt();
+        let y1 = y.toInt();
+
+        //large
+        if (hasCollision(la1, x1, y1, laRadius)){
+            do spawnSmallAsteroid(la1.getX(), la1.getY());
+            do spawnExplosion(la1.getX(), la1.getY());
+            do la1.erasePrev();
+            do la1.dispose();
+            let la1 = null;
+            return true;
+        }
+        if (hasCollision(la2, x1, y1, laRadius)){
+            do spawnSmallAsteroid(la2.getX(), la2.getY());
+            do spawnSmallAsteroid(la2.getX(), la2.getY());
+            do spawnExplosion(la2.getX(), la2.getY());
+            do la2.erasePrev();
+            do la2.dispose();
+            let la2 = null;
+            return true;
+        }
+        if (hasCollision(la3, x1, y1, laRadius)){
+            do spawnSmallAsteroid(la3.getX(), la3.getY());
+            do spawnExplosion(la3.getX(), la3.getY());
+            do la3.erasePrev();
+            do la3.dispose();
+            let la3 = null;
+            return true;
+        }
+        if (hasCollision(la4, x1, y1, laRadius)){
+            do spawnSmallAsteroid(la4.getX(), la4.getY());
+            do spawnSmallAsteroid(la2.getX(), la2.getY());
+            do spawnExplosion(la4.getX(), la4.getY());
+            do la4.erasePrev();
+            do la4.dispose();
+            let la4 = null;
+            return true;
+        }
+        //small
+        if (hasCollision(sa1, x1, y1, saRadius)){
+            do spawnExplosion(sa1.getX(), sa1.getY());
+            do sa1.erasePrev();
+            do sa1.dispose();
+            let sa1 = null;
+            return true;
+        }
+        if (hasCollision(sa2, x1, y1, saRadius)){
+            do spawnExplosion(sa2.getX(), sa2.getY());
+            do sa2.erasePrev();
+            do sa2.dispose();
+            let sa2 = null;
+            return true;
+        }
+        if (hasCollision(sa3, x1, y1, saRadius)){
+            do spawnExplosion(sa3.getX(), sa3.getY());
+            do sa3.erasePrev();
+            do sa3.dispose();
+            let sa3 = null;
+            return true;
+        }
+        if (hasCollision(sa4, x1, y1, saRadius)){
+            do spawnExplosion(sa4.getX(), sa4.getY());
+            do sa4.erasePrev();
+            do sa4.dispose();
+            let sa4 = null;
+            return true;
+        }
+        if (hasCollision(sa5, x1, y1, saRadius)){
+            do spawnExplosion(sa5.getX(), sa5.getY());
+            do sa5.erasePrev();
+            do sa5.dispose();
+            let sa5 = null;
+            return true;
+        }
+        if (hasCollision(sa6, x1, y1, saRadius)){
+            do spawnExplosion(sa6.getX(), sa6.getY());
+            do sa6.erasePrev();
+            do sa6.dispose();
+            let sa6 = null;
+            return true;
+        }
+        return false;
+    }
+
+    method boolean hasCollision(Poly asteroid, int x, int y, int aSize){
+        var int x1, y1;
+        var Float a;
+
+        if (asteroid = null){
+            return false;
+        }
+
+        let a = asteroid.getX();
+        let x1 = a.toInt();
+        let a = asteroid.getY();
+        let y1 = a.toInt();
+        return AsteroidSpawner.isTouching(x, y, x1, y1, aSize);
+    }
+
+    method void changeRandInt(){
+        let randIntIndex = randIntIndex+1;
+        if (randInt > (randIntCount-1)) {
+            let randIntIndex = 0;
+        }
+        let randInt = randInts[randIntIndex];
+        return;
+    }
+
+    function boolean isTouching(int x1, int y1, int x2, int y2, int buffer){
+        if ((x2 > (x1-buffer)) & (y2 > (y1-buffer)) & 
+            (x2 < (x1+buffer)) & (y2 < (y1+buffer))){
+            return true;
+        }
+        return false;
+    }
+}

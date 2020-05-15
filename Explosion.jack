@@ -1,0 +1,139 @@
+class Explosion {
+
+    static int timeLimit, points, radius;
+    static Array xPos, yPos, xVel, yVel;
+
+    field int x, y, currTime;
+    field Array currX, currY, prevX, prevY;
+
+    function void init(){
+        let timeLimit = 15;
+        let points = 8;
+        let radius = 1;
+
+        let xPos = Array.new(points);
+        let yPos = Array.new(points);
+        let xVel = Array.new(points);
+        let yVel = Array.new(points);
+
+        let xPos[0] = 5;
+        let yPos[0] = 1;
+        let xVel[0] = 2;
+        let yVel[0] = 0;
+
+        let xPos[1] = 3;
+        let yPos[1] = 2;
+        let xVel[1] = 2;
+        let yVel[1] = 1;
+
+        let xPos[2] = 0;
+        let yPos[2] = 4;
+        let xVel[2] = 0;
+        let yVel[2] = 2;
+
+        let xPos[3] = -2;
+        let yPos[3] = 2;
+        let xVel[3] = -2;
+        let yVel[3] = 1;
+
+        let xPos[4] = -4;
+        let yPos[4] = 1;
+        let xVel[4] = -2;
+        let yVel[4] = 0;
+
+        let xPos[5] = -1;
+        let yPos[5] = -3;
+        let xVel[5] = -1;
+        let yVel[5] = -2;
+
+        let xPos[6] = 0;
+        let yPos[6] = -6;
+        let xVel[6] = 0;
+        let yVel[6] = -2;
+
+        let xPos[7] = 1;
+        let yPos[7] = 0;
+        let xVel[7] = 2;
+        let yVel[7] = -1;                                                        
+        return;
+    }
+
+    constructor Explosion new(int ix, int iy){
+        let x = ix;
+        let y = iy;
+        let currTime = 0;
+        let currX = Main.copyArr(xPos, points, 1);
+        let currY = Main.copyArr(yPos, points, 1);
+        let prevX = Main.copyArr(xPos, points, 1);
+        let prevY = Main.copyArr(yPos, points, 1);
+        return this;
+    }
+
+    method void dispose(){
+        do currX.dispose();
+        do currY.dispose();
+        do prevX.dispose();
+        do prevY.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void move(){
+        do Explosion.incPoints(currX, xVel);
+        do Explosion.incPoints(currY, yVel);
+        return;
+    }
+
+    method boolean draw(){
+        let currTime = currTime+1;
+
+        // erasing previous points
+        do Screen.setColor(true);
+        do drawPoints(prevX, prevY);
+
+        //remove explosion if it has reached its timeLimit limit
+        if (currTime > timeLimit){
+            do dispose();
+            return true;
+        }
+
+        //drawing points
+        do Screen.setColor(false);
+        do drawPoints(currX, currY);
+        do copyPoints();
+        return false;
+    }
+    
+    method void drawPoints(Array xs, Array ys){
+        var int i;
+        let i = 0;
+
+        while (i < points){
+            do Screen.drawCircle(Main.fx1(x+xs[i], radius), Main.fy1(y+ys[i], radius), radius);
+            let i = i+1;
+        }
+        return;
+    }
+
+    method void copyPoints(){
+        var int i;
+        let i = 0;
+        while (i < points){
+            let prevX[i] = currX[i];
+            let prevY[i] = currY[i];
+            let i = i+1;
+        }
+        return;
+    }
+
+    function void incPoints(Array a, Array b){
+        var int i;
+        let i = 0;
+
+        while (i < points){
+            let a[i] = a[i]+b[i];
+            let i = i+1;
+        }
+        return;
+    }
+}

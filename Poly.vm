@@ -1,0 +1,386 @@
+function Poly.new 0
+push constant 11
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+call Float.new 1
+pop this 0
+push argument 1
+call Float.new 1
+pop this 1
+push argument 4
+pop this 4
+push argument 2
+pop this 5
+push argument 3
+pop this 6
+push this 4
+call Array.new 1
+pop this 7
+push this 4
+call Array.new 1
+pop this 8
+push this 4
+call Array.new 1
+pop this 9
+push this 4
+call Array.new 1
+pop this 10
+push argument 6
+call Float.cos 1
+pop this 2
+push argument 6
+call Float.sin 1
+pop this 3
+push this 2
+push argument 5
+call Float.mult 2
+pop temp 0
+push this 3
+push argument 5
+call Float.mult 2
+pop temp 0
+push pointer 0
+call Poly.calcPos 1
+pop temp 0
+push pointer 0
+call Poly.copyPoints 1
+pop temp 0
+push pointer 0
+return
+function Poly.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Float.dispose 1
+pop temp 0
+push this 1
+call Float.dispose 1
+pop temp 0
+push this 2
+call Float.dispose 1
+pop temp 0
+push this 3
+call Float.dispose 1
+pop temp 0
+push this 7
+call Array.dispose 1
+pop temp 0
+push this 8
+call Array.dispose 1
+pop temp 0
+push this 9
+call Array.dispose 1
+pop temp 0
+push this 10
+call Array.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function Poly.getX 0
+push argument 0
+pop pointer 0
+push this 0
+return
+function Poly.getY 0
+push argument 0
+pop pointer 0
+push this 1
+return
+function Poly.move 0
+push argument 0
+pop pointer 0
+push this 0
+push this 2
+call Float.add 2
+pop temp 0
+push this 1
+push this 3
+call Float.add 2
+pop temp 0
+push pointer 0
+call Poly.checkBounds 1
+pop temp 0
+push constant 0
+return
+function Poly.draw 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Poly.calcPos 1
+pop temp 0
+push pointer 0
+call Poly.erasePrev 1
+pop temp 0
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push pointer 0
+push this 7
+push this 8
+call Poly.drawLines 3
+pop temp 0
+push pointer 0
+call Poly.copyPoints 1
+pop temp 0
+push constant 0
+return
+function Poly.drawLines 1
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push this 4
+push constant 1
+sub
+lt
+not
+if-goto WHILE_END0
+push local 0
+push argument 1
+add
+pop pointer 1
+push that 0
+push local 0
+push argument 2
+add
+pop pointer 1
+push that 0
+push local 0
+push constant 1
+add
+push argument 1
+add
+pop pointer 1
+push that 0
+push local 0
+push constant 1
+add
+push argument 2
+add
+pop pointer 1
+push that 0
+call Screen.drawLine 4
+pop temp 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push this 4
+push constant 1
+sub
+push argument 1
+add
+pop pointer 1
+push that 0
+push this 4
+push constant 1
+sub
+push argument 2
+add
+pop pointer 1
+push that 0
+push constant 0
+push argument 1
+add
+pop pointer 1
+push that 0
+push constant 0
+push argument 2
+add
+pop pointer 1
+push that 0
+call Screen.drawLine 4
+pop temp 0
+push constant 0
+return
+function Poly.erasePrev 0
+push argument 0
+pop pointer 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push pointer 0
+push this 9
+push this 10
+call Poly.drawLines 3
+pop temp 0
+push constant 0
+return
+function Poly.calcPos 3
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+push this 0
+call Float.toInt 1
+pop local 1
+push this 1
+call Float.toInt 1
+pop local 2
+label WHILE_EXP0
+push local 0
+push this 4
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 7
+add
+push local 1
+push local 0
+push this 5
+add
+pop pointer 1
+push that 0
+add
+call Main.fx 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push this 8
+add
+push local 2
+push local 0
+push this 6
+add
+pop pointer 1
+push that 0
+add
+call Main.fy 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+function Poly.copyPoints 1
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push this 4
+lt
+not
+if-goto WHILE_END0
+push local 0
+push this 9
+add
+push local 0
+push this 7
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push this 10
+add
+push local 0
+push this 8
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+function Poly.checkBounds 4
+push argument 0
+pop pointer 0
+push this 0
+call Float.toInt 1
+pop local 2
+push this 1
+call Float.toInt 1
+pop local 3
+call Main.getScreenWidth 0
+call Float.new 1
+pop local 0
+call Main.getScreenHeight 0
+call Float.new 1
+pop local 1
+push local 2
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 0
+push local 0
+call Float.add 2
+pop temp 0
+label IF_FALSE0
+push local 3
+push constant 0
+lt
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 1
+push local 1
+call Float.add 2
+pop temp 0
+label IF_FALSE1
+push local 2
+call Main.getScreenWidth 0
+push constant 1
+sub
+gt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 0
+push local 0
+call Float.sub 2
+pop temp 0
+label IF_FALSE2
+push local 3
+call Main.getScreenHeight 0
+push constant 1
+sub
+gt
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push this 1
+push local 1
+call Float.sub 2
+pop temp 0
+label IF_FALSE3
+push local 0
+call Float.dispose 1
+pop temp 0
+push local 1
+call Float.dispose 1
+pop temp 0
+push constant 0
+return

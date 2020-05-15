@@ -1,0 +1,172 @@
+class RotatablePoly4{
+
+    field Array currX, currY, prevX, prevY; //stores the position (x, y) of each vertex
+    field Float x, y, r1, r2, r3, r4; //stores the radius of 4 points (using polar coordinates)
+    field Angle angle, a1, a2, a3, a4; //stores angle of Poly, and angles of each of its points from the center
+
+    constructor RotatablePoly4 new(int ix, int iy, Float ir1, Angle ia1, Float ir2, Angle ia2, Flaot ir3, Angle ia3, Float ir4, Angle ia4) {
+        let x = Float.new(ix);
+        let y = Float.new(iy);
+        let currX = Array.new(4);
+        let currY = Array.new(4);
+        let prevX = Array.new(4);
+        let prevY = Array.new(4);
+        let angle = Angle.new();
+
+        let r1 = ir1;
+        let a1 = ia1;
+        let r2 = ir2;
+        let a2 = ia2;
+        let r3 = ir3;
+        let a3 = ia3;
+        let r4 = ir4;
+        let a4 = ia4;
+
+        do calcPos();
+        do copyPoints();
+        return this;
+    }
+
+    method void dispose(){
+        do currX.dispose();
+        do currY.dispose();
+        do prevX.dispose();
+        do prevY.dispose();
+        do x.dispose();
+        do y.dispose();
+        do r1.dispose();
+        do r2.dispose();
+        do r3.dispose();
+        do r4.dispose();
+        do angle.dispose();
+        do a1.dispose();
+        do a2.dispose();
+        do a3.dispose();
+        do a4.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method Float getX() { return x; }
+    method Float getY() { return y; }
+    method Angle getAngle() { return angle; }
+
+    method void move(Float xInc, Float yInc){
+        do x.add(xInc);
+        do y.add(yInc);
+        return;
+    }
+
+    method void rotate(Float x){
+        //rotating angle forward
+        do angle.rotate(x);
+        return;
+    }
+
+    method void rotateBack(Float x){
+        //rotating angle backwards
+        do angle.rotateBack(x);
+        return;
+    }
+
+    method void draw() {
+        //calculating positions of vertex's first
+        do calcPos();
+
+        //erasing previous lines
+        do erasePrev();
+
+        //drawing new lines
+        do Screen.setColor(false);
+        do drawLines(currX, currY);
+        do copyPoints();
+        return;
+    }
+
+    method void erasePrev(){
+        do Screen.setColor(true);
+        do drawLines(prevX, prevY);
+        return;
+    }
+
+    method void copyPoints(){
+        var int i;
+        let i = 0;
+        while (i < 4){
+            let prevX[i] = currX[i];
+            let prevY[i] = currY[i];
+            let i = i+1;
+        }
+        return;
+    }
+
+    method void drawLines(Array xPos, Array yPos) {
+        //drawing lines
+        do Screen.drawLine(Main.fx(xPos[0]), Main.fy(yPos[0]), Main.fx(xPos[1]), Main.fy(yPos[1]));
+        do Screen.drawLine(Main.fx(xPos[1]), Main.fy(yPos[1]), Main.fx(xPos[2]), Main.fy(yPos[2]));
+        do Screen.drawLine(Main.fx(xPos[2]), Main.fy(yPos[2]), Main.fx(xPos[3]), Main.fy(yPos[3]));
+        do Screen.drawLine(Main.fx(xPos[3]), Main.fy(yPos[3]), Main.fx(xPos[0]), Main.fy(yPos[0]));
+        return;
+    }
+
+    method void calcPos(){        
+        var Angle a;
+        var Float b, c;
+        var int fx, fy;
+        let fx = x.toInt();
+        let fy = y.toInt();
+
+        //calculating x[0] and y[0]
+        let a = Angle.new1(angle);
+        do a.rotate(a1.toFloat());
+        let b = Float.cos(a);
+        let c = Float.sin(a);
+        do b.mult(r1);
+        do c.mult(r1);
+        let currX[0] = fx+b.toInt();
+        let currY[0] = fy+c.toInt();
+        do a.dispose();
+        do b.dispose();
+        do c.dispose();
+
+        //calculating x[1] and y[1]
+        let a = Angle.new1(angle);
+        do a.rotate(a2.toFloat());
+        let b = Float.cos(a);
+        let c = Float.sin(a);
+        do b.mult(r2);
+        do c.mult(r2);
+        let currX[1] = fx+b.toInt();
+        let currY[1] = fy+c.toInt();
+        do a.dispose();
+        do b.dispose();
+        do c.dispose();
+
+        //calculating x[2] and y[2]
+        let a = Angle.new1(angle);
+        do a.rotate(a3.toFloat());
+        let b = Float.cos(a);
+        let c = Float.sin(a);
+        do b.mult(r3);
+        do c.mult(r3);
+        let currX[2] = fx+b.toInt();
+        let currY[2] = fy+c.toInt();
+        do a.dispose();
+        do b.dispose();
+        do c.dispose();
+
+        //calculating x[3] and y[3]
+        let a = Angle.new1(angle);
+        do a.rotate(a4.toFloat());
+        let b = Float.cos(a);
+        let c = Float.sin(a);
+        do b.mult(r4);
+        do c.mult(r4);
+        let currX[3] = fx+b.toInt();
+        let currY[3] = fy+c.toInt();
+        do a.dispose();
+        do b.dispose();
+        do c.dispose();
+        return;
+    }
+}

@@ -1,0 +1,173 @@
+function Angle.init 0
+push constant 5
+call String.new 1
+push constant 51
+call String.appendChar 2
+push constant 46
+call String.appendChar 2
+push constant 49
+call String.appendChar 2
+push constant 52
+call String.appendChar 2
+push constant 50
+call String.appendChar 2
+call Float.new1 1
+pop static 0
+push constant 6
+call String.new 1
+push constant 45
+call String.appendChar 2
+push constant 51
+call String.appendChar 2
+push constant 46
+call String.appendChar 2
+push constant 49
+call String.appendChar 2
+push constant 52
+call String.appendChar 2
+push constant 50
+call String.appendChar 2
+call Float.new1 1
+pop static 2
+push constant 5
+call String.new 1
+push constant 49
+call String.appendChar 2
+push constant 46
+call String.appendChar 2
+push constant 53
+call String.appendChar 2
+push constant 55
+call String.appendChar 2
+push constant 49
+call String.appendChar 2
+call Float.new1 1
+pop static 1
+push constant 5
+call String.new 1
+push constant 54
+call String.appendChar 2
+push constant 46
+call String.appendChar 2
+push constant 50
+call String.appendChar 2
+push constant 56
+call String.appendChar 2
+push constant 51
+call String.appendChar 2
+call Float.new1 1
+pop static 3
+push constant 0
+return
+function Angle.pi 0
+push static 0
+return
+function Angle.halfPi 0
+push static 1
+return
+function Angle.negPi 0
+push static 2
+return
+function Angle.twoPi 0
+push static 3
+return
+function Angle.new 0
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push constant 0
+call Float.new 1
+pop this 0
+push pointer 0
+return
+function Angle.new1 0
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push constant 0
+call Float.new 1
+pop this 0
+push pointer 0
+push argument 0
+call Angle.toFloat 1
+call Angle.rotate 2
+pop temp 0
+push pointer 0
+return
+function Angle.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Float.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function Angle.toFloat 0
+push argument 0
+pop pointer 0
+push this 0
+return
+function Angle.print 0
+push argument 0
+pop pointer 0
+push this 0
+call Float.print 1
+pop temp 0
+push constant 0
+return
+function Angle.rotate 0
+push argument 0
+pop pointer 0
+push this 0
+push argument 1
+call Float.add 2
+pop temp 0
+push pointer 0
+call Angle.normalize 1
+pop temp 0
+push constant 0
+return
+function Angle.rotateBack 0
+push argument 0
+pop pointer 0
+push this 0
+push argument 1
+call Float.sub 2
+pop temp 0
+push pointer 0
+call Angle.normalize 1
+pop temp 0
+push constant 0
+return
+function Angle.normalize 0
+push argument 0
+pop pointer 0
+label WHILE_EXP0
+push this 0
+push static 0
+call Float.gt 2
+not
+if-goto WHILE_END0
+push this 0
+push static 3
+call Float.sub 2
+pop temp 0
+goto WHILE_EXP0
+label WHILE_END0
+label WHILE_EXP1
+push static 2
+push this 0
+call Float.gt 2
+not
+if-goto WHILE_END1
+push this 0
+push static 3
+call Float.add 2
+pop temp 0
+goto WHILE_EXP1
+label WHILE_END1
+push constant 0
+return

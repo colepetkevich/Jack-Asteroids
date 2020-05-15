@@ -1,0 +1,243 @@
+class Ship{
+
+    field RotatablePoly4 ship;
+    field Float speed, res, vx, vy, bulletSpeed, firingDist;
+    field int bulletRadius, asteroidsDestroyed;
+    field Bullet b1, b2, b3;
+    field AsteroidSpawner asteroids;
+
+    constructor Ship new(int x, int y, Float s, Float r, Float bs, AsteroidSpawner as){
+        var Float r1, r2, r3, r4, f1, f2, f3, f4;
+        var Angle a1, a2, a3, a4;
+
+        //setting vertex radius (lengths)
+        let r1 = Float.new(4);
+        let r2 = Float.new(16);
+        let r3 = Float.new(12);
+        let r4 = Float.new(16);
+
+        //setting veretx angle from center
+        let a1 = Angle.new();
+        let f1 = Float.new1("3.142");
+        do a1.rotate(f1);
+        let a2 = Angle.new();
+        let f2 = Float.new1("2.5");
+        do a2.rotate(f2);
+        let a3 = Angle.new();
+        let f3 = Float.new1("0");
+        do a3.rotate(f3);
+        let a4 = Angle.new();
+        let f4 = Float.new1("-2.5");
+        do a4.rotate(f4);
+
+        let bulletSpeed = bs;
+        let bulletRadius = 1;
+        let b1 = null;
+        let b2 = null;
+        let b3 = null;
+        let firingDist = r3;
+
+        let ship = RotatablePoly4.new(x, y, r1, a1, r2, a2, r3, a3, r4, a4);
+        let speed = s;
+        let res = r;
+        let vx = Float.new(0);
+        let vy = Float.new(0);
+
+        let asteroids = as;
+        let asteroidsDestroyed = 0;
+
+        do f1.dispose();
+        do f2.dispose();
+        do f3.dispose();
+        do f4.dispose();
+        return this;
+    }
+
+    method void dispose(){
+        do ship.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method Float getX() { return ship.getX(); }
+    method Float getY() { return ship.getY(); }
+    method int getScore() { return asteroidsDestroyed; }
+
+    method void move(){
+        do vx.mult(res);
+        do vy.mult(res);
+
+        //ship
+        do ship.move(vx, vy);
+
+        //moving bullets
+        if (~(b1 = null)){
+            do b1.move();
+            if (asteroids.hasBeenHit(b1.getX(), b1.getY())){
+                do b1.erasePrev();
+                do b1.dispose();
+                let b1 = null;
+                let asteroidsDestroyed = asteroidsDestroyed+1;
+            }
+        }
+        if (~(b2 = null)){
+            do b2.move();
+            if (asteroids.hasBeenHit(b2.getX(), b2.getY())){
+                do b2.erasePrev();
+                do b2.dispose();
+                let b2 = null;
+                let asteroidsDestroyed = asteroidsDestroyed+1;
+            }
+        }
+        if (~(b3 = null)){
+            do b3.move();
+            if (asteroids.hasBeenHit(b3.getX(), b3.getY())){
+                do b3.erasePrev();
+                do b3.dispose();
+                let b3 = null;
+                let asteroidsDestroyed = asteroidsDestroyed+1;
+            }            
+        }
+
+        do checkBounds();      
+        return;
+    }
+
+    method void accelerate(){
+        var Float a, b;
+        let a = Float.cos(ship.getAngle());
+        let b = Float.sin(ship.getAngle());
+        do a.mult(speed);
+        do b.mult(speed);
+        do vx.add(a);
+        do vy.add(b);
+
+        do a.dispose();
+        do b.dispose();
+        return;
+    }
+
+    method void rotate(Float x){
+        do ship.rotate(x);
+        return;
+    }
+
+    method void rotateBack(Float x){
+        do ship.rotateBack(x);
+        return;
+    }
+
+    method void fire(){
+        var Float fx, fy, sx, sy;
+        var int bx, by;
+        let fx = Float.cos(ship.getAngle());
+        let fy = Float.sin(ship.getAngle());
+        do fx.mult(firingDist);
+        do fy.mult(firingDist);
+        let sx = ship.getX();
+        let sy = ship.getY();
+        let bx = sx.toInt()+fx.toInt();
+        let by = sy.toInt()+fy.toInt();
+
+        //only spawn bullet if they r in bounds
+        if (((bx-bulletRadius) < 0) | ((by-bulletRadius) < 0) | ((bx+bulletRadius) > (Main.getScreenWidth()-1)) | ((by+bulletRadius) > (Main.getScreenHeight()-1))){
+            return;
+        }
+
+        //b1 is unfired
+        if (b1 = null){
+            let b1 = Bullet.new(bx, by, 
+                bulletRadius, bulletSpeed, ship.getAngle());
+        }
+        //b1 is active
+        else{
+            //b2 is unfired
+            if (b2 = null){
+                let b2 = Bullet.new(bx, by, 
+                    bulletRadius, bulletSpeed, ship.getAngle());
+            }
+            //b2 is active
+            else{
+                //b3 is unfired
+                if (b3 = null){
+                    let b3 = Bullet.new(bx, by, 
+                        bulletRadius, bulletSpeed, ship.getAngle());
+                }
+            }
+        }
+
+        do fx.dispose();
+        do fy.dispose();
+        return;
+    }
+
+    method void draw(){
+        do ship.draw();
+        
+        //drawing bullets
+        if (~(b1 = null)){
+            if (b1.inBounds()){
+                do b1.draw();
+            }
+            else{
+                do b1.erasePrev();
+                do b1.dispose();
+                let b1 = null;
+            }
+        }
+        if (~(b2 = null)){
+            if (b2.inBounds()){
+                do b2.draw();
+            }
+            else{
+                do b2.erasePrev();
+                do b2.dispose();
+                let b2 = null;
+            }
+        }
+        if (~(b3 = null)){
+            if (b3.inBounds()){
+                do b3.draw();
+            }
+            else{
+                do b3.erasePrev();
+                do b3.dispose();
+                let b3 = null;
+            }
+        }
+        return;
+    }
+
+    method void erasePrev(){
+        do ship.erasePrev();
+        return;
+    }
+
+    method void checkBounds(){
+        var Float a, b, w, h;
+        var int sx, sy;
+        let a = ship.getX();
+        let sx = a.toInt();
+        let b = ship.getY();
+        let sy = b.toInt();
+        let w = Float.new(Main.getScreenWidth());
+        let h = Float.new(Main.getScreenHeight());
+
+        if (sx < 0) {
+            do a.add(w);
+        }
+        if (sy < 0) {
+            do b.add(h);
+        }
+        if (sx > (Main.getScreenWidth()-1)) {
+            do a.sub(w);
+        }
+        if (sy > (Main.getScreenHeight()-1)) {
+            do b.sub(h);
+        }
+
+        do w.dispose();
+        do h.dispose();
+        return;
+    }
+}

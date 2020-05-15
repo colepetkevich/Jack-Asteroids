@@ -1,0 +1,203 @@
+class Main{
+
+    static int screenWidth, screenHeight;
+    static int waitTime;
+
+    function void init() {
+        do Float.init();
+        do Angle.init();
+        do AsteroidSpawner.init();
+        do Explosion.init();
+
+        let screenWidth = 512;
+        let screenHeight = 256;
+        let waitTime = 10; //around 30 fps (25ms would be 40 fps but I am adding ~23ms for computational time)
+        return;
+    }
+
+    function void main() {        
+        var Ship ship;
+        var Float shipSpeed, shipRotationInterval, shipResistance, bulletSpeed;
+        var int fireDelay, fd, spawnDelay, sd;
+        var char c;
+        var AsteroidSpawner asteroids;
+        var Explosion explosion;
+        var boolean gameOver;
+        var String scoreMessage, zero;
+
+        //DO NOT COMMENT OUT!!!
+        do Main.init();
+
+        //drawing black background
+        do Screen.setColor(true);
+        do Screen.drawRectangle(0, 0, screenWidth-1, screenHeight-1);
+        
+        //creating asteroids and their attributes
+        let spawnDelay = 75;
+        let sd = 0;
+        let asteroids = AsteroidSpawner.new();
+
+        //creating ship and its attributes
+        let shipSpeed = Float.new1(".75");
+        let shipRotationInterval = Float.new1(".15");
+        let shipResistance = Float.new1(".95");
+        let bulletSpeed = Float.new1("10");
+        let fireDelay = 5;
+        let fd = 0;
+        let ship = Ship.new(screenWidth/2-1, screenHeight/2-1, shipSpeed, 
+            shipResistance, bulletSpeed, asteroids);
+
+        let scoreMessage = "SCORE: ";
+        let zero = "0";
+
+        let gameOver = false;
+        let explosion = null;
+        while ((~gameOver) | (~(explosion = null))) {
+            let c = Keyboard.keyPressed();
+            let fd = fd-1;
+            let sd = sd-1;
+
+            if (~gameOver){
+                //ship rotation
+                if (c = 130) { //left arrow
+                    do ship.rotateBack(shipRotationInterval);
+                }
+                if (c = 132) { //right arrow
+                    do ship.rotate(shipRotationInterval);
+                }
+                if (c = 131) { //up arrow
+                    do ship.accelerate();
+                }
+                if (c = 32) { //space
+                    if (fd < 0){
+                        do ship.fire();
+                        let fd = fireDelay;
+                    }
+                }
+
+                if (sd < 0){
+                    do asteroids.spawnAsteroid();
+                    let sd = spawnDelay;
+                }
+
+                //moving and drawing ship
+                do ship.move();
+                do ship.draw();
+            }
+
+            //moving and drawing asteroids
+            do asteroids.moveAstroids();
+            do asteroids.drawAsteroids();
+
+            //check if ship is hit by asteroids
+            if (asteroids.hasBeenHit(ship.getX(), ship.getY())){
+                let gameOver = true;
+                do ship.erasePrev();
+                let explosion = Explosion.new(ship.getX(), ship.getY());
+            }
+            //spawning explosion
+            if (gameOver){
+                if (~(explosion = null)){
+                    do explosion.move();
+                    if (explosion.draw()){
+                        let explosion = null;
+                    }
+                }
+            }
+
+            //printing score
+            do Main.printScore(ship.getScore(), scoreMessage, zero);
+
+            //waiting
+            do Sys.wait(waitTime);
+            //accounting for the computational time from ship.draw()
+            if (gameOver){
+                do Sys.wait(23);
+            }
+        }
+        return;
+    }
+
+    function void printScore(int score, String scoreMessage, String zero) {
+        //removing previous score
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+        do Output.backSpace();
+
+        do Output.printString(scoreMessage);
+        if (score < 1000){
+            do Output.printString(zero);
+        }
+        if (score < 100){
+            do Output.printString(zero);
+        }
+        if (score < 10){
+            do Output.printString(zero);
+        }
+        do Output.printInt(score);
+        return;
+    }
+
+    function int fx(int x){
+        if (x < 0){
+            return 0;
+        }
+        if (x > (screenWidth-1)){
+            return screenWidth-1;
+        }
+        return x;
+    }
+
+    function int fy(int y){
+        if (y < 0){
+            return 0;
+        }
+        if (y > (screenHeight-1)){
+            return screenHeight-1;
+        }
+        return y;
+    }
+
+    function int fx1(int x, int r){
+        if ((x-r) < 0){
+            return r;
+        }
+        if ((x+r) > (screenWidth-1)){
+            return screenWidth-1-r;
+        }
+        return x;
+    }
+
+    function int fy1(int y, int r){
+        if ((y-r) < 0){
+            return r;
+        }
+        if ((y+r) > (screenHeight-1)){
+            return screenHeight-1-r;
+        }
+        return y;
+    }
+
+    function Array copyArr(Array a, int size, int mult){
+        var Array b;
+        var int i;
+        let b = Array.new(size);
+        let i = 0;
+        while (i < size){
+            let b[i] = mult*a[i];
+            let i = i+1;
+        }
+        return b;
+    }
+
+    function int getScreenWidth() { return screenWidth; }
+    function int getScreenHeight() { return screenHeight; }
+}
